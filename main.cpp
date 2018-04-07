@@ -1,32 +1,16 @@
 #include "hardware_address.h"
+#include "link.h"
 #include "vector.h"
-#include "yaml.h"
 
 #include <assert.h>
 #include <iostream>
 #include <libmnl/libmnl.h>
-#include <linux/if.h>
+#include <linux/if_link.h>
+#include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <string>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
-
-struct Link : public YamlObject {
-  std::string ifname;
-  HardwareAddress hwaddr, broadcast;
-
-  void write_yaml(std::ostream &stream,
-                  const yaml_indent_level_t indent_level = 0) const {
-    const std::string indent(indent_level, ' ');
-    stream << "ifname: " + ifname + "\n";
-    stream << indent + "hwaddr: ";
-    hwaddr.write_yaml(stream);
-    stream << "\n";
-    stream << indent + "broadcast: ";
-    broadcast.write_yaml(stream);
-    stream << "\n";
-  }
-};
 
 static int link_attr_cb(const nlattr *attr, void *data) {
   Link *link = (Link *)data;
