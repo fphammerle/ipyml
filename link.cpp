@@ -18,6 +18,9 @@ int Link::mnl_attr_cb(const nlattr *attr, void *data) {
   case IFLA_IFNAME:
     link->ifname = mnl_attr_get_str(attr);
     break;
+  case IFLA_OPERSTATE:
+    link->operstate = attr;
+    break;
   }
   return MNL_CB_OK;
 }
@@ -32,4 +35,6 @@ void Link::write_yaml(std::ostream &stream,
   stream << indent + "broadcast: ";
   broadcast.write_yaml(stream);
   stream << "\n";
+  stream << indent + "operstate: ";
+  operstate.write_yaml(stream);
 }

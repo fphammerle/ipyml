@@ -2,6 +2,7 @@
 #define _IPYML_LINK_H
 
 #include "hardware_address.h"
+#include "operstate.h"
 #include "yaml.h"
 
 #include <linux/netlink.h>
@@ -11,6 +12,7 @@
 class Link : public YamlObject {
   std::string ifname;
   HardwareAddress hwaddr, broadcast;
+  OperState operstate;
 
 public:
   // typedef int (*mnl_attr_cb_t)(const struct nlattr *attr, void *data);
