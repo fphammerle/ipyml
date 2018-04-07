@@ -12,6 +12,7 @@
 class Link : public YamlObject {
   std::string ifname;
   HardwareAddress address, broadcast;
+  unsigned long int mtu;
   OperState operstate;
 
 public:

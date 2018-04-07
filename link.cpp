@@ -8,6 +8,7 @@
 
 int Link::mnl_attr_cb(const nlattr *attr, void *data) {
   Link *link = (Link *)data;
+  // /usr/include/linux/if_link.h
   switch (mnl_attr_get_type(attr)) {
   case IFLA_ADDRESS:
     link->address = attr;
@@ -17,6 +18,10 @@ int Link::mnl_attr_cb(const nlattr *attr, void *data) {
     break;
   case IFLA_IFNAME:
     link->ifname = mnl_attr_get_str(attr);
+    break;
+  case IFLA_MTU:
+    assert(mnl_attr_get_payload_len(attr) == 4);
+    link->mtu = mnl_attr_get_u32(attr);
     break;
   case IFLA_OPERSTATE:
     link->operstate = attr;
@@ -29,12 +34,13 @@ void Link::write_yaml(std::ostream &stream,
                       const yaml_indent_level_t indent_level) const {
   const std::string indent(indent_level, ' ');
   stream << "ifname: " + ifname + "\n";
-  stream << indent + "address: ";
+  stream << indent << "address: ";
   address.write_yaml(stream);
   stream << "\n";
-  stream << indent + "broadcast: ";
+  stream << indent << "broadcast: ";
   broadcast.write_yaml(stream);
   stream << "\n";
-  stream << indent + "operstate: ";
+  stream << indent << "mtu: " << mtu << "\n";
+  stream << indent << "operstate: ";
   operstate.write_yaml(stream);
 }
