@@ -2,7 +2,8 @@
 #include "link.h"
 #include "vector.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <libmnl/libmnl.h>
 #include <linux/netlink.h>
