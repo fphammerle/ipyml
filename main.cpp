@@ -1,3 +1,4 @@
+#include "vector.h"
 #include "yaml.h"
 
 #include <assert.h>
@@ -9,7 +10,6 @@
 #include <linux/rtnetlink.h>
 #include <sstream>
 #include <string>
-#include <vector>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
 
@@ -54,23 +54,6 @@ struct Link : public YamlObject {
     stream << indent + "broadcast: ";
     broadcast.write_yaml(stream);
     stream << "\n";
-  }
-};
-
-template <class T> class vector : public std::vector<T>, YamlObject {
-public:
-  void write_yaml(std::ostream &stream,
-                  const yaml_indent_level_t indent_level = 0) const {
-    if (this->empty()) {
-      stream << "[]";
-    } else {
-      const std::string indent(indent_level, ' ');
-      stream << "\n";
-      for (auto it = this->begin(); it != this->end(); it++) {
-        stream << indent << "- ";
-        it->write_yaml(stream, indent_level + 2);
-      }
-    }
   }
 };
 
