@@ -10,7 +10,7 @@ int Link::mnl_attr_cb(const nlattr *attr, void *data) {
   Link *link = (Link *)data;
   switch (mnl_attr_get_type(attr)) {
   case IFLA_ADDRESS:
-    link->hwaddr = attr;
+    link->address = attr;
     break;
   case IFLA_BROADCAST:
     link->broadcast = attr;
@@ -29,8 +29,8 @@ void Link::write_yaml(std::ostream &stream,
                       const yaml_indent_level_t indent_level) const {
   const std::string indent(indent_level, ' ');
   stream << "ifname: " + ifname + "\n";
-  stream << indent + "hwaddr: ";
-  hwaddr.write_yaml(stream);
+  stream << indent + "address: ";
+  address.write_yaml(stream);
   stream << "\n";
   stream << indent + "broadcast: ";
   broadcast.write_yaml(stream);

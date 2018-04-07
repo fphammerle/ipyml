@@ -11,7 +11,7 @@
 
 class Link : public YamlObject {
   std::string ifname;
-  HardwareAddress hwaddr, broadcast;
+  HardwareAddress address, broadcast;
   OperState operstate;
 
 public:
