@@ -1,3 +1,5 @@
+#include "yaml.h"
+
 #include <assert.h>
 #include <cstring>
 #include <iomanip>
@@ -10,13 +12,6 @@
 #include <vector>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
-
-typedef size_t yaml_indent_level_t;
-
-class YamlObject {
-  virtual void write_yaml(std::ostream &stream,
-                          const yaml_indent_level_t indent_level = 0) const = 0;
-};
 
 struct HardwareAddress : public YamlObject {
   uint8_t bytes[IFHWADDRLEN];
@@ -120,7 +115,8 @@ int main(int argc, char *argv[]) {
   vector<Link> links;
   size_t numbytes = mnl_socket_recvfrom(nl, msgbuf, sizeof(msgbuf));
   while (numbytes > 0) {
-    if (mnl_cb_run(msgbuf, numbytes, nlh->nlmsg_seq, nlpid, link_cb, &links) <= MNL_CB_STOP) {
+    if (mnl_cb_run(msgbuf, numbytes, nlh->nlmsg_seq, nlpid, link_cb, &links) <=
+        MNL_CB_STOP) {
       break;
     } else {
       numbytes = mnl_socket_recvfrom(nl, msgbuf, sizeof(msgbuf));
