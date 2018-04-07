@@ -12,6 +12,19 @@
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
 
+void mnl_recv_run_cb_all(const mnl_socket *nl, void *buf, size_t bufsiz,
+                         mnl_cb_t cb_data, void *data) {
+  unsigned int nlpid = mnl_socket_get_portid(nl);
+  ssize_t numbytes = mnl_socket_recvfrom(nl, buf, bufsiz);
+  while (numbytes > 0) {
+    if (mnl_cb_run(buf, numbytes, 0, nlpid, cb_data, data) <= MNL_CB_STOP) {
+      break;
+    }
+    numbytes = mnl_socket_recvfrom(nl, buf, bufsiz);
+  }
+  assert(numbytes != -1);
+}
+
 static int link_cb(const nlmsghdr *nlh, void *data) {
   vector<Link> *links = (vector<Link> *)data;
   links->emplace_back();
@@ -20,26 +33,13 @@ static int link_cb(const nlmsghdr *nlh, void *data) {
 }
 
 void mnl_read_links(const mnl_socket *nl, vector<Link> *links) {
-  unsigned int nlpid = mnl_socket_get_portid(nl);
-
   uint8_t msgbuf[MNL_SOCKET_BUFFER_SIZE];
   nlmsghdr *nlh = mnl_nlmsg_put_header(msgbuf);
   nlh->nlmsg_type = RTM_GETLINK;
   nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
-  nlh->nlmsg_seq = 0;
   mnl_nlmsg_put_extra_header(nlh, sizeof(rtgenmsg));
   assert(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0);
-
-  size_t numbytes = mnl_socket_recvfrom(nl, msgbuf, sizeof(msgbuf));
-  while (numbytes > 0) {
-    if (mnl_cb_run(msgbuf, numbytes, nlh->nlmsg_seq, nlpid, link_cb, links) <=
-        MNL_CB_STOP) {
-      break;
-    } else {
-      numbytes = mnl_socket_recvfrom(nl, msgbuf, sizeof(msgbuf));
-    }
-  }
-  assert(numbytes != -1);
+  mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), link_cb, links);
 }
 
 int main(int argc, char *argv[]) {
