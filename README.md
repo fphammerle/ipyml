@@ -12,7 +12,7 @@ apt install libmnl-dev linux-libc-dev g++
 
 ```yaml
 $ ipyml
-
+links:
 - ifname: lo
   address: 00:00:00:00:00:00
   broadcast: 00:00:00:00:00:00
@@ -28,6 +28,10 @@ $ ipyml
   broadcast: ff:ff:ff:ff:ff:ff
   mtu: 1500
   operstate: up
+addresses:
+- 127.0.0.1
+- 192.168.2.101
+- 192.168.20.11
 
 ```
 

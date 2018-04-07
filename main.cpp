@@ -1,3 +1,4 @@
+#include "address.h"
 #include "hardware_address.h"
 #include "link.h"
 #include "vector.h"
@@ -8,7 +9,6 @@
 #include <libmnl/libmnl.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
-#include <string>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
 
@@ -25,7 +25,7 @@ void mnl_recv_run_cb_all(const mnl_socket *nl, void *buf, size_t bufsiz,
   assert(numbytes != -1);
 }
 
-static int link_cb(const nlmsghdr *nlh, void *data) {
+int link_cb(const nlmsghdr *nlh, void *data) {
   vector<Link> *links = (vector<Link> *)data;
   links->emplace_back();
   mnl_attr_parse(nlh, sizeof(ifinfomsg), Link::mnl_attr_cb, &links->back());
@@ -42,6 +42,24 @@ void mnl_read_links(const mnl_socket *nl, vector<Link> *links) {
   mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), link_cb, links);
 }
 
+static int address_cb(const struct nlmsghdr *nlh, void *data) {
+  vector<Address> *addrs = (vector<Address> *)data;
+  addrs->emplace_back();
+  mnl_attr_parse(nlh, sizeof(ifaddrmsg), Address::mnl_attr_cb, &addrs->back());
+  return MNL_CB_OK;
+}
+
+void mnl_read_addresses(const mnl_socket *nl, vector<Address> *addrs) {
+  char msgbuf[MNL_SOCKET_BUFFER_SIZE];
+  nlmsghdr *nlh = mnl_nlmsg_put_header(msgbuf);
+  nlh->nlmsg_type = RTM_GETADDR;
+  nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+  rtgenmsg *rt = (rtgenmsg *)mnl_nlmsg_put_extra_header(nlh, sizeof(rtgenmsg));
+  rt->rtgen_family = AF_INET;
+  assert(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0);
+  mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), address_cb, addrs);
+}
+
 int main(int argc, char *argv[]) {
   mnl_socket *nl = mnl_socket_open(NETLINK_ROUTE);
   assert(nl);
@@ -49,9 +67,15 @@ int main(int argc, char *argv[]) {
 
   vector<Link> links;
   mnl_read_links(nl, &links);
+  std::cout << "links: ";
   links.write_yaml(std::cout);
-  std::cout << std::endl;
 
+  vector<Address> addrs;
+  mnl_read_addresses(nl, &addrs);
+  std::cout << "addresses: ";
+  addrs.write_yaml(std::cout);
+
+  std::cout << std::endl;
   mnl_socket_close(nl);
   return EXIT_SUCCESS;
 }
