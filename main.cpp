@@ -5,34 +5,16 @@
 #include <assert.h>
 #include <iostream>
 #include <libmnl/libmnl.h>
-#include <linux/if_link.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <string>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
 
-static int link_attr_cb(const nlattr *attr, void *data) {
-  Link *link = (Link *)data;
-  // /usr/include/linux/if_link.h
-  switch (mnl_attr_get_type(attr)) {
-  case IFLA_ADDRESS:
-    link->hwaddr = attr;
-    break;
-  case IFLA_BROADCAST:
-    link->broadcast = attr;
-    break;
-  case IFLA_IFNAME:
-    link->ifname = mnl_attr_get_str(attr);
-    break;
-  }
-  return MNL_CB_OK;
-}
-
 static int link_cb(const nlmsghdr *nlh, void *data) {
   vector<Link> *links = (vector<Link> *)data;
   links->emplace_back();
-  mnl_attr_parse(nlh, sizeof(ifinfomsg), link_attr_cb, &links->back());
+  mnl_attr_parse(nlh, sizeof(ifinfomsg), Link::mnl_attr_cb, &links->back());
   return MNL_CB_OK;
 }
 
