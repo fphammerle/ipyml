@@ -1,44 +1,15 @@
+#include "hardware_address.h"
 #include "vector.h"
 #include "yaml.h"
 
 #include <assert.h>
-#include <cstring>
-#include <iomanip>
 #include <iostream>
 #include <libmnl/libmnl.h>
 #include <linux/if.h>
 #include <linux/rtnetlink.h>
-#include <sstream>
 #include <string>
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
-
-struct HardwareAddress : public YamlObject {
-  uint8_t bytes[IFHWADDRLEN];
-
-  HardwareAddress &operator=(const nlattr *attr) {
-    assert(mnl_attr_get_payload_len(attr) == IFHWADDRLEN);
-    memcpy(this->bytes, mnl_attr_get_payload(attr), IFHWADDRLEN);
-    return *this;
-  }
-
-  std::string format() const {
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int i = 0; i < IFHWADDRLEN; i++) {
-      if (i != 0) {
-        ss << ':';
-      }
-      ss << std::setw(2) << (int)bytes[i];
-    }
-    return ss.str();
-  }
-
-  void write_yaml(std::ostream &stream,
-                  const yaml_indent_level_t indent_level = 0) const {
-    stream << format();
-  }
-};
 
 struct Link : public YamlObject {
   std::string ifname;
