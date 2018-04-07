@@ -19,10 +19,7 @@ static int link_cb(const nlmsghdr *nlh, void *data) {
   return MNL_CB_OK;
 }
 
-int main(int argc, char *argv[]) {
-  mnl_socket *nl = mnl_socket_open(NETLINK_ROUTE);
-  assert(nl);
-  assert(mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) == 0);
+void mnl_read_links(const mnl_socket *nl, vector<Link> *links) {
   unsigned int nlpid = mnl_socket_get_portid(nl);
 
   uint8_t msgbuf[MNL_SOCKET_BUFFER_SIZE];
@@ -33,10 +30,9 @@ int main(int argc, char *argv[]) {
   mnl_nlmsg_put_extra_header(nlh, sizeof(rtgenmsg));
   assert(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0);
 
-  vector<Link> links;
   size_t numbytes = mnl_socket_recvfrom(nl, msgbuf, sizeof(msgbuf));
   while (numbytes > 0) {
-    if (mnl_cb_run(msgbuf, numbytes, nlh->nlmsg_seq, nlpid, link_cb, &links) <=
+    if (mnl_cb_run(msgbuf, numbytes, nlh->nlmsg_seq, nlpid, link_cb, links) <=
         MNL_CB_STOP) {
       break;
     } else {
@@ -44,6 +40,15 @@ int main(int argc, char *argv[]) {
     }
   }
   assert(numbytes != -1);
+}
+
+int main(int argc, char *argv[]) {
+  mnl_socket *nl = mnl_socket_open(NETLINK_ROUTE);
+  assert(nl);
+  assert(mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) == 0);
+
+  vector<Link> links;
+  mnl_read_links(nl, &links);
   links.write_yaml(std::cout);
   std::cout << std::endl;
 
