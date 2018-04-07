@@ -18,6 +18,7 @@ class HardwareAddress : public YamlObject {
 
 public:
   HardwareAddress &operator=(const nlattr *attr) {
+    assert(mnl_attr_validate(attr, MNL_TYPE_BINARY) == 0);
     assert(mnl_attr_get_payload_len(attr) == IFHWADDRLEN);
     memcpy(this->bytes, mnl_attr_get_payload(attr), IFHWADDRLEN);
     return *this;

@@ -24,7 +24,7 @@ class OperState : public YamlObject {
 
 public:
   OperState &operator=(const nlattr *attr) {
-    assert(mnl_attr_get_payload_len(attr) == 1);
+    assert(mnl_attr_validate(attr, MNL_TYPE_U8) == 0);
     this->state = mnl_attr_get_u8(attr);
     return *this;
   }

@@ -17,10 +17,11 @@ int Link::mnl_attr_cb(const nlattr *attr, void *data) {
     link->broadcast = attr;
     break;
   case IFLA_IFNAME:
+    assert(mnl_attr_validate(attr, MNL_TYPE_STRING) == 0);
     link->ifname = mnl_attr_get_str(attr);
     break;
   case IFLA_MTU:
-    assert(mnl_attr_get_payload_len(attr) == 4);
+    assert(mnl_attr_validate(attr, MNL_TYPE_U32) == 0);
     link->mtu = mnl_attr_get_u32(attr);
     break;
   case IFLA_OPERSTATE:
