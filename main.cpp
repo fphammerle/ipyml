@@ -9,7 +9,7 @@
 #include <libmnl/libmnl.h>
 #include <linux/if_addr.h>
 #include <linux/netlink.h>
-#include <linux/rtnetlink.h>
+#include <linux/rtnetlink.h> // struct ifinfomsg
 
 // https://netfilter.org/projects/libmnl/doxygen/html/modules.html
 
@@ -28,7 +28,8 @@ void mnl_recv_run_cb_all(const mnl_socket *nl, void *buf, size_t bufsiz,
 
 int link_cb(const nlmsghdr *nlh, void *data) {
   vector<Link> *links = (vector<Link> *)data;
-  links->emplace_back();
+  links->emplace_back((const ifinfomsg *)mnl_nlmsg_get_payload(nlh));
+  assert(links->back().index == links->size());
   mnl_attr_parse(nlh, sizeof(ifinfomsg), Link::mnl_attr_cb, &links->back());
   return MNL_CB_OK;
 }

@@ -6,16 +6,23 @@
 #include "yaml.h"
 
 #include <linux/netlink.h>
+#include <linux/rtnetlink.h> // struct ifinfomsg
 #include <ostream>
 #include <string>
 
 class Link : public YamlObject {
+public:
+  unsigned int index;
+
+private:
   std::string ifname;
   HardwareAddress address, broadcast;
   unsigned long int mtu;
   OperState operstate;
 
 public:
+  Link(const ifinfomsg *msg);
+
   // typedef int (*mnl_attr_cb_t)(const struct nlattr *attr, void *data);
   static int mnl_attr_cb(const nlattr *attr, void *data);
 
