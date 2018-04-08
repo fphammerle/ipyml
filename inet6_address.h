@@ -33,11 +33,15 @@ public:
     inet_ntop(AF_INET6, bytes, dst, size);
   }
 
-  void write_yaml(std::ostream &stream,
-                  const yaml_indent_level_t indent_level = 0) const {
+  std::string format() const {
     char str[INET6_ADDRSTRLEN];
     format(str, sizeof(str));
-    stream << str << '\n';
+    return std::string(str);
+  }
+
+  void write_yaml(std::ostream &stream,
+                  const yaml_indent_level_t indent_level = 0) const {
+    stream << format() << '\n';
   }
 };
 

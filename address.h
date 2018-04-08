@@ -11,12 +11,15 @@
 #include <linux/netlink.h> // struct nlattr
 #include <ostream>         // std::ostream
 
+// https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/tree/ip/ipaddress.c
+// print_addrinfo()
+
 class Address : public YamlObject {
 public:
   unsigned int ifindex;
 
 private:
-  unsigned char family;
+  unsigned char family, prefixlen;
   union {
     InetAddress inet_addr;
     Inet6Address inet6_addr;
@@ -36,6 +39,7 @@ public:
     ifindex = msg->ifa_index;
     family = msg->ifa_family;
     assert(family == AF_INET || family == AF_INET6);
+    prefixlen = msg->ifa_prefixlen;
   }
 
   // typedef int (*mnl_attr_cb_t)(const struct nlattr *attr, void *data);
@@ -58,10 +62,11 @@ public:
                   const yaml_indent_level_t indent_level = 0) const {
     // const std::string indent(indent_level, ' ');
     if (family == AF_INET) {
-      inet_addr.write_yaml(stream, indent_level + 2);
+      stream << inet_addr.format();
     } else if (family == AF_INET6) {
-      inet6_addr.write_yaml(stream, indent_level + 2);
+      stream << inet6_addr.format();
     }
+    stream << '/' << (int)prefixlen << '\n';
   }
 };
 
