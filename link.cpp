@@ -4,6 +4,8 @@
 #include <linux/if_link.h> // IFLA_*
 #include <string>          // std::string
 
+// https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/tree/ip/iplink.c
+
 Link::Link(const ifinfomsg *msg) {
   /*
   struct ifinfomsg {
@@ -13,6 +15,11 @@ Link::Link(const ifinfomsg *msg) {
       unsigned int   ifi_flags;  // Device flags
       unsigned int   ifi_change; // change mask
   };
+
+  see /usr/include/net/if_arp.h for ifi_type:
+  > #define ARPHRD_ETHER    1
+  > #define ARPHRD_LOOPBACK 772
+  > #define ARPHRD_SIT      776
   */
   index = msg->ifi_index;
 }
