@@ -57,4 +57,6 @@ void Link::write_yaml(std::ostream &stream,
   stream << indent << "mtu: " << mtu << "\n";
   stream << indent << "operstate: ";
   operstate.write_yaml(stream);
+  stream << indent << "addresses: ";
+  addresses.write_yaml(stream, indent_level + 2);
 }

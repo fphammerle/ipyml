@@ -8,9 +8,8 @@
 #include <cassert>         // assert
 #include <cstring>         // memcpy
 #include <libmnl/libmnl.h> // mnl_attr_*
-#include <linux/in6.h>     // struct in6_addr
 #include <linux/netlink.h> // struct nlattr
-#include <netinet/in.h>    // INET6_ADDRSTRLEN
+#include <netinet/in.h>    // INET6_ADDRSTRLEN, struct in6_addr
 #include <ostream>         // std::ostream
 
 /*

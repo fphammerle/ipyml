@@ -45,14 +45,14 @@ void mnl_read_links(const mnl_socket *nl, vector<Link> *links) {
 }
 
 static int address_cb(const struct nlmsghdr *nlh, void *data) {
-  vector<Address> *addrs = (vector<Address> *)data;
-  addrs->emplace_back();
-  addrs->back() = (const ifaddrmsg *)mnl_nlmsg_get_payload(nlh);
-  mnl_attr_parse(nlh, sizeof(ifaddrmsg), Address::mnl_attr_cb, &addrs->back());
+  vector<Link> *links = (vector<Link> *)data;
+  Address addr((const ifaddrmsg *)mnl_nlmsg_get_payload(nlh));
+  mnl_attr_parse(nlh, sizeof(ifaddrmsg), Address::mnl_attr_cb, &addr);
+  links->at(addr.ifindex - 1).addresses.push_back(addr);
   return MNL_CB_OK;
 }
 
-void mnl_read_addresses(const mnl_socket *nl, vector<Address> *addrs) {
+void mnl_add_addresses(const mnl_socket *nl, vector<Link> *links) {
   char msgbuf[MNL_SOCKET_BUFFER_SIZE];
   nlmsghdr *nlh = mnl_nlmsg_put_header(msgbuf);
   nlh->nlmsg_type = RTM_GETADDR;
@@ -60,7 +60,7 @@ void mnl_read_addresses(const mnl_socket *nl, vector<Address> *addrs) {
   rtgenmsg *rt = (rtgenmsg *)mnl_nlmsg_put_extra_header(nlh, sizeof(rtgenmsg));
   rt->rtgen_family = AF_UNSPEC;
   assert(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0);
-  mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), address_cb, addrs);
+  mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), address_cb, links);
 }
 
 int main(int argc, char *argv[]) {
@@ -70,15 +70,11 @@ int main(int argc, char *argv[]) {
 
   vector<Link> links;
   mnl_read_links(nl, &links);
+  mnl_add_addresses(nl, &links);
   std::cout << "links: ";
   links.write_yaml(std::cout);
-
-  vector<Address> addrs;
-  mnl_read_addresses(nl, &addrs);
-  std::cout << "addresses: ";
-  addrs.write_yaml(std::cout);
-
   std::cout << std::endl;
+
   mnl_socket_close(nl);
   return EXIT_SUCCESS;
 }

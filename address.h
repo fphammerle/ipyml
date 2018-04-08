@@ -12,6 +12,10 @@
 #include <ostream>         // std::ostream
 
 class Address : public YamlObject {
+public:
+  unsigned int ifindex;
+
+private:
   unsigned char family;
   union {
     InetAddress inet_addr;
@@ -19,12 +23,19 @@ class Address : public YamlObject {
   };
 
 public:
-  Address() : family(AF_UNSPEC) {}
-
-  Address &operator=(const ifaddrmsg *msg) {
+  Address(const ifaddrmsg *msg) {
+    /*
+    struct ifaddrmsg {
+        unsigned char ifa_family;    // Address type
+        unsigned char ifa_prefixlen; // Prefixlength of address
+        unsigned char ifa_flags;     // Address flags
+        unsigned char ifa_scope;     // Address scope
+        int           ifa_index;     // Interface index
+    };
+    */
+    ifindex = msg->ifa_index;
     family = msg->ifa_family;
     assert(family == AF_INET || family == AF_INET6);
-    return *this;
   }
 
   // typedef int (*mnl_attr_cb_t)(const struct nlattr *attr, void *data);

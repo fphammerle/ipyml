@@ -8,9 +8,8 @@
 #include <cassert>         // assert
 #include <cstring>         // memcpy
 #include <libmnl/libmnl.h> // mnl_attr_*
-#include <linux/in.h>      // struct in_addr_t
 #include <linux/netlink.h> // struct nlattr
-#include <netinet/in.h>    // INET_ADDRSTRLEN
+#include <netinet/in.h>    // INET_ADDRSTRLEN, struct in_addr
 #include <ostream>         // std::ostream
 
 /*
@@ -20,7 +19,7 @@ class may not have any virtual member due to:
 */
 
 class InetAddress { // : public YamlObject {
-  unsigned char bytes[sizeof(in_addr_t)];
+  unsigned char bytes[sizeof(in_addr)];
 
 public:
   InetAddress &operator=(const nlattr *attr) {

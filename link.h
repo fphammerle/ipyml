@@ -1,8 +1,10 @@
 #ifndef _IPYML_LINK_H
 #define _IPYML_LINK_H
 
+#include "address.h"
 #include "hardware_address.h"
 #include "operstate.h"
+#include "list.h"
 #include "yaml.h"
 
 #include <linux/netlink.h>
@@ -13,6 +15,7 @@
 class Link : public YamlObject {
 public:
   unsigned int index;
+  list<Address> addresses;
 
 private:
   std::string ifname;
