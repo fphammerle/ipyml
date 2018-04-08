@@ -24,6 +24,15 @@ public:
     return *this;
   }
 
+  bool specified() const {
+    for (unsigned char i = 0; i < IFHWADDRLEN; i++) {
+      if (bytes[i] != 0x00) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::string format() const {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');

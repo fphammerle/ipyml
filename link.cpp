@@ -48,12 +48,16 @@ void Link::write_yaml(std::ostream &stream,
   const std::string indent(indent_level, ' ');
   stream << "ifname: " + ifname + "\n";
   // stream << indent << "index: " << index << "\n";
-  stream << indent << "address: ";
-  address.write_yaml(stream);
-  stream << "\n";
-  stream << indent << "broadcast: ";
-  broadcast.write_yaml(stream);
-  stream << "\n";
+  if (address.specified()) {
+    stream << indent << "address: ";
+    address.write_yaml(stream);
+    stream << "\n";
+  }
+  if (broadcast.specified()) {
+    stream << indent << "broadcast: ";
+    broadcast.write_yaml(stream);
+    stream << "\n";
+  }
   stream << indent << "mtu: " << mtu << "\n";
   stream << indent << "operstate: ";
   operstate.write_yaml(stream);
