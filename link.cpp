@@ -51,12 +51,10 @@ void Link::write_yaml(std::ostream &stream,
   if (address.specified()) {
     stream << indent << "address: ";
     address.write_yaml(stream);
-    stream << "\n";
   }
   if (broadcast.specified()) {
     stream << indent << "broadcast: ";
     broadcast.write_yaml(stream);
-    stream << "\n";
   }
   stream << indent << "mtu: " << mtu << "\n";
   stream << indent << "operstate: ";

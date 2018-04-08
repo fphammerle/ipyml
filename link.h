@@ -3,8 +3,8 @@
 
 #include "address.h"
 #include "hardware_address.h"
-#include "operstate.h"
 #include "list.h"
+#include "operstate.h"
 #include "yaml.h"
 
 #include <linux/netlink.h>

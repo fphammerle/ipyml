@@ -47,7 +47,7 @@ public:
 
   void write_yaml(std::ostream &stream,
                   const yaml_indent_level_t indent_level = 0) const {
-    stream << format();
+    stream << format() << '\n';
   }
 };
 
