@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <libmnl/libmnl.h>
+#include <linux/if_addr.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
@@ -45,6 +46,7 @@ void mnl_read_links(const mnl_socket *nl, vector<Link> *links) {
 static int address_cb(const struct nlmsghdr *nlh, void *data) {
   vector<Address> *addrs = (vector<Address> *)data;
   addrs->emplace_back();
+  addrs->back() = (const ifaddrmsg *)mnl_nlmsg_get_payload(nlh);
   mnl_attr_parse(nlh, sizeof(ifaddrmsg), Address::mnl_attr_cb, &addrs->back());
   return MNL_CB_OK;
 }
@@ -55,7 +57,7 @@ void mnl_read_addresses(const mnl_socket *nl, vector<Address> *addrs) {
   nlh->nlmsg_type = RTM_GETADDR;
   nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
   rtgenmsg *rt = (rtgenmsg *)mnl_nlmsg_put_extra_header(nlh, sizeof(rtgenmsg));
-  rt->rtgen_family = AF_INET;
+  rt->rtgen_family = AF_UNSPEC;
   assert(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0);
   mnl_recv_run_cb_all(nl, msgbuf, sizeof(msgbuf), address_cb, addrs);
 }
